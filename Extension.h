@@ -11,7 +11,7 @@
 
 class Extension {
 public:
-    static void GoToXY(int x, int y);
+    static void GoToXY(short x, short y);
     static void Clear();
     static Vector2 GetConsoleSize();
     static void SetCursorVisibility(bool visibilityFlag);

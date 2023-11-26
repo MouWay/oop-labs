@@ -12,6 +12,7 @@ public:
     int Y;
 public:
     Vector2(int x, int y);
+    Vector2();
 };
 
 

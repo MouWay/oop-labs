@@ -10,12 +10,12 @@ private:
     unsigned short length;
     unsigned short pos = 0;
     unsigned short lastSymbolIndex = 0;
-    std::vector<Symbol*> symbols;
+    std::vector<std::unique_ptr<Symbol>> symbols;
 public:
     Line(unsigned short length, unsigned short x);
     void Generate() override;
-    void Move() override;
-    void Explode();
+    int Move() override;
+    Vector2 Explode();
     Vector2 GetLastSymbolPosition();
     void SetColor(int color);
 };

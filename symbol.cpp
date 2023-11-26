@@ -2,14 +2,16 @@
 #include "Extension.h"
 #include <iostream>
 #include <experimental/random>
+#include <memory>
 
-Symbol::Symbol(Vector2* p){
-    pos = p;
+Symbol::Symbol(Vector2 p){
+    pos.X = p.X;
+    pos.Y = p.Y;
 }
 
 Symbol::~Symbol(){
-    if (IsInRange(*pos)){
-        Extension::GoToXY(pos->X, pos->Y);
+    if ((IsInRange(pos) && Extension::GetSymbolFromPosition(pos.X, pos.Y) == symbol)){
+        Extension::GoToXY(pos.X, pos.Y);
         std::cout << ' ';
     }
 }
@@ -21,14 +23,14 @@ void Symbol::SetColor(int c) {
 void Symbol::SetPosition(short x, short y) {
     char lastSymbol = symbol;
     SetRandomSymbol();
-    if (IsInRange(*pos) && Extension::GetSymbolFromPosition(pos->X, pos->Y) == lastSymbol){
-        Extension::GoToXY(pos->X, pos->Y);
+    if (IsInRange(pos) && Extension::GetSymbolFromPosition(pos.X, pos.Y) == lastSymbol){
+        Extension::GoToXY(pos.X, pos.Y);
         std::cout << ' ';
     }
-    pos->X = x;
-    pos->Y = y;
-    if (IsInRange(*pos)){
-        Extension::GoToXY(pos->X, pos->Y);
+    pos.X = x;
+    pos.Y = y;
+    if (IsInRange(pos)){
+        Extension::GoToXY(pos.X, pos.Y);
         Extension::SetOutputColor(color);
         std::cout << symbol;
     }
@@ -43,7 +45,7 @@ int Symbol::GetColor() const {
 }
 
 Vector2 Symbol::GetPosition() const {
-    return *pos;
+    return pos;
 }
 
 char Symbol::GetSymbol() const {
@@ -57,13 +59,4 @@ bool Symbol::IsInRange(Vector2 p) const {
 
 void Symbol::SetRandomSymbol() {
     SetSymbol(std::experimental::randint(33, 126));
-}
-
-void Symbol::Redraw() {
-    SetRandomSymbol();
-    if (IsInRange(*pos)){
-        Extension::GoToXY(pos->X, pos->Y);
-        Extension::SetOutputColor(color);
-        std::cout << symbol;
-    }
 }

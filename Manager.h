@@ -15,11 +15,12 @@ private:
     unsigned short curLine = 0;
     unsigned long nextMoveTime;
     unsigned long nextExplosionMoveTime;
+    unsigned long nextExplosionTime;
     unsigned long nextSpawnTime;
     unsigned long curSecond;
     bool isEpilepsyOn;
-    std::vector<Line*> lines;
-    std::vector<Explosion*> explosions;
+    std::vector<std::unique_ptr<Line>> lines;
+    std::vector<std::unique_ptr<Explosion>> explosions;
     std::vector<unsigned short> delay;
     Vector2 consoleSize;
 public:

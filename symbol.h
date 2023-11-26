@@ -2,15 +2,15 @@
 #define MATRIX_SYMBOL_H
 
 #include "vector2.h"
+#include <memory>
 
 class Symbol {
 private:
     char symbol = 'a';
     unsigned short color = 2;
-    Vector2* pos;
+    Vector2 pos{};
 public:
-    Symbol(Vector2* pos);
-    Symbol();
+    explicit Symbol(Vector2 pos);
     ~Symbol();
     void SetColor(int c);
     void SetSymbol(char s);
@@ -18,10 +18,9 @@ public:
     void SetPosition(short x, short y);
     int GetColor() const;
     char GetSymbol() const;
-    Vector2 GetPosition() const;
-    void Redraw();
+    [[nodiscard]] Vector2 GetPosition() const;
 private:
-    bool IsInRange(Vector2 p) const;
+    [[nodiscard]] bool IsInRange(Vector2 p) const;
 };
 
 

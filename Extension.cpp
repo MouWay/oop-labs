@@ -1,7 +1,7 @@
 #include "Extension.h"
 #include "Windows.h"
 
-void Extension::GoToXY(int x, int y) {
+void Extension::GoToXY(short x, short y) {
     COORD pos = {x, y};
     HANDLE output = GetStdHandle(STD_OUTPUT_HANDLE);
     SetConsoleCursorPosition(output, pos);

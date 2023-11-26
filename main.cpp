@@ -2,8 +2,9 @@
 #include "Manager.h"
 
 int main() {
-    Manager* manager = new Manager();
-    manager->Simulate();
+    auto manager = std::make_unique<Manager>();
+    manager.get()->Simulate();
 
     return 0;
 }
+

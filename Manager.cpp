@@ -26,6 +26,7 @@ void Manager::GetData() {
 void Manager::Initialize() {
     curSecond = clock();
     nextMoveTime = curSecond + 1000 / lineVelocity;
+    nextExplosionTime = curSecond + 1000;
     nextExplosionMoveTime = curSecond + 500;
     Extension::Clear();
     Extension::SetCursorVisibility(false);
@@ -36,7 +37,7 @@ void Manager::Initialize() {
 }
 
 void Manager::Simulate() {
-    while (true){
+    while (!(GetKeyState(VK_MENU) & 0x8000)){
         int curTime = clock();
         if (curLine >= spawnFrequency && curTime >= curSecond + 1000) {
             curLine = 0;
@@ -55,15 +56,14 @@ void Manager::Simulate() {
 
         //spawn lines
         if (curTime >= nextSpawnTime && curLine < spawnFrequency) {
-            auto consoleSize = Extension::GetConsoleSize();
             int spawnPoint = std::experimental::randint(0, consoleSize.X);
-            Line* line = new Line(lineLength, spawnPoint);
-            lines.emplace_back(line);
+            auto line = make_unique<Line>(lineLength, spawnPoint);
             if (isEpilepsyOn) {
                 int color = std::experimental::randint(0, 15);
-                line->SetColor(color);
+                line.get()->SetColor(color);
             }
             line->Generate();
+            lines.push_back(std::move(line));
             curLine++;
             nextSpawnTime = curSecond + delay[curLine];
         }
@@ -71,21 +71,25 @@ void Manager::Simulate() {
         //move lines
         if (curTime >= nextMoveTime){
             MoveLines();
-            nextMoveTime += 1000 / lineVelocity;
         }
 
         //explode
-        for (auto line : lines) {
-            int chance = experimental::randint(1, 1000);
-            if (chance >= explosionProbability){
-                line->Explode();
-                Explosion explosion = *new Explosion();
+        if (curTime >= nextExplosionTime){
+            for (const auto & line : lines) {
+                int chance = experimental::randint(1, 1000);
+                if (chance <= explosionProbability){
+                    Vector2 pos = line->Explode();
+                    auto explosion = std::make_unique<Explosion>(pos);
+                    explosion.get()->Generate();
+                    explosions.push_back(std::move(explosion));
+                }
             }
+            nextExplosionTime += 1000;
         }
 
         //move explosions
         if (curTime >= nextExplosionMoveTime) {
-            nextExplosionMoveTime += 500;
+            MoveExplosions();
         }
     }
 }
@@ -93,18 +97,19 @@ void Manager::Simulate() {
 void Manager::MoveLines() {
     for (int i = lines.size() - 1; i >= 0; i--) {
         if (lines[i]->GetLastSymbolPosition().Y > consoleSize.Y) {
-            delete lines[i];
             lines.erase(lines.begin() + i);
         }
         else lines[i]->Move();
     }
+    nextMoveTime += 1000 / lineVelocity;
 }
 
 void Manager::MoveExplosions() {
-    if (explosions.size() == 0) return;
-    for (int i = 0; i < explosions.size(); i++){
-        explosions[i]->Move();
+    for (int i = explosions.size() - 1; i >= 0; i--){
+        auto r = explosions[i]->Move();
+        if (r >= std::experimental::randint(minRadius, maxRadius)) explosions.erase(explosions.begin() + i);
     }
+    nextExplosionMoveTime += 500;
 }
 
 void Manager::GetFrequency() {

@@ -4,11 +4,12 @@
 
 #include "Explosion.h"
 #include "Extension.h"
+#include <experimental/random>
 #include <iostream>
 
-Explosion::Explosion(Vector2* p, short r) {
-    pos = p;
-    maxRadius = r;
+Explosion::Explosion(Vector2 p) {
+    pos.X = p.X;
+    pos.Y = p.Y;
 }
 
 void Explosion::PutPixels(int x, int y, int curX, int curY) {
@@ -28,11 +29,11 @@ void Explosion::Draw() {
     curX = 0;
     curY = radius;
     while (curX <= curY){
-        PutPixels(pos->X, pos->Y, curX, curY);
+        PutPixels(pos.X, pos.Y, curX, curY);
         if (d <= 0) {
             d = d + 4 * curX + 6;
         } else {
-            d = d + 4 * (pos->X - pos->Y) + 10;
+            d = d + 4 * (pos.X - pos.Y) + 10;
             curY--;
         }
         curX++;
@@ -40,21 +41,22 @@ void Explosion::Draw() {
 }
 
 void Explosion::PutPixel(int x, int y){
-    Symbol s = *new Symbol(new Vector2(0, 0));
-    s.SetPosition(x, y);
-    symbols.push_back(s);
+    auto s = std::make_unique<Symbol>(Vector2(0, 0));
+    int color = std::experimental::randint(0, 15);
+    s.get()->SetColor(color);
+    s.get()->SetPosition(x, y);
+    symbols.push_back(std::move(s));
 }
 
 void Explosion::Generate() {
     Draw();
 }
 
-void Explosion::Move() {
+int Explosion::Move() {
     radius++;
     for (int i = symbols.size() - 1; i >= 0; i--) {
-        delete &symbols[i];
         symbols.erase(symbols.begin() + i);
     }
-    if (radius == maxRadius) delete this;
     Draw();
+    return radius;
 }

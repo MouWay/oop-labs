@@ -4,7 +4,7 @@
 
 class Figure {
     virtual void Generate() = 0;
-    virtual void Move() = 0;
+    virtual int Move() = 0;
 };
 
 

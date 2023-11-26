@@ -5,7 +5,8 @@ Line::Line(unsigned short len, unsigned short x) {
     length = len;
     pos = x;
     for (int i = 0; i < len; ++i) {
-        symbols.push_back(new Symbol(new Vector2(0, 0)));
+        auto s = std::make_unique<Symbol>(Vector2());
+        symbols.push_back(std::move(s));
     }
 }
 
@@ -17,23 +18,26 @@ void Line::Generate() {
     lastSymbolIndex = 0;
 }
 
-void Line::Move() {
-    Symbol* s = symbols[lastSymbolIndex];
+int Line::Move() {
+    auto s = symbols[lastSymbolIndex].get();
     short lastY = s->GetPosition().Y;
     int offset = length % 2 + s->GetPosition().X - pos;
     s->SetPosition(pos + offset, lastY + length);
     lastSymbolIndex = ++lastSymbolIndex % length;
+    return lastY;
 }
 
-void Line::Explode() {
+Vector2 Line::Explode() {
     int index = lastSymbolIndex == 0 ? length - 1 : lastSymbolIndex - 1;
     Vector2 pos = symbols[index]->GetPosition();
-    delete symbols[index];
     symbols.erase(symbols.begin() + index);
+    length--;
+    if (lastSymbolIndex >= length) lastSymbolIndex = length - 1;
+    return pos;
 }
 
 void Line::SetColor(int color) {
-    for (auto s : symbols) {
+    for (const auto & s : symbols) {
         s->SetColor(color);
     }
 }
