@@ -41,10 +41,11 @@ void Explosion::Draw() {
 }
 
 void Explosion::PutPixel(int x, int y){
+    int k = 2;
     auto s = std::make_unique<Symbol>(Vector2(0, 0));
     int color = std::experimental::randint(0, 15);
     s.get()->SetColor(color);
-    s.get()->SetPosition(x, y);
+    s.get()->SetPosition(2 * x, y);
     symbols.push_back(std::move(s));
 }
 
