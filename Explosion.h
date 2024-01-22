@@ -7,9 +7,10 @@
 #include <vector>
 #include <memory>
 
-class Explosion : Figure{
+class Explosion : public Figure{
 private:
     short radius = 1;
+    short maxRadius;
     Vector2 pos{};
     std::vector<std::unique_ptr<Symbol>> symbols;
 private:
@@ -17,8 +18,9 @@ private:
     void PutPixel(int x, int y);
     void PutPixels(int x, int y, int curX, int curY);
 public:
-    Explosion(Vector2 p);
+    Explosion(unsigned long time, Vector2 p, short maxR);
     void Generate() override;
+    bool NeedToDelete() override;
     int Move() override;
 };
 

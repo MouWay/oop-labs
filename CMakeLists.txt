@@ -17,4 +17,13 @@ add_executable(Matrix main.cpp
         Figure.cpp
         Figure.h
         Explosion.cpp
-        Explosion.h)
+        Explosion.h
+        List.cpp
+        List.h
+        ArrayList.cpp
+        ArrayList.h
+        ArrayListIterator.cpp
+        ArrayListIterator.h
+        LinkedList.cpp
+        LinkedList.h
+)

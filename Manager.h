@@ -3,6 +3,7 @@
 
 #include "Line.h"
 #include "Explosion.h"
+#include "ArrayList.h"
 
 class Manager {
 private:
@@ -13,14 +14,14 @@ private:
     unsigned short minRadius;
     unsigned short maxRadius;
     unsigned short curLine = 0;
+    unsigned short frameRate = 30;
     unsigned long nextMoveTime;
-    unsigned long nextExplosionMoveTime;
-    unsigned long nextExplosionTime;
     unsigned long nextSpawnTime;
+    unsigned long nextExplosionTime;
     unsigned long curSecond;
     bool isEpilepsyOn;
-    std::vector<std::unique_ptr<Line>> lines;
-    std::vector<std::unique_ptr<Explosion>> explosions;
+    ArrayList<std::shared_ptr<Figure>> figures;
+    ArrayList<std::shared_ptr<Line>> lines;
     std::vector<unsigned short> delay;
     Vector2 consoleSize;
 public:
@@ -29,8 +30,7 @@ public:
 private:
     void GetData();
     void Initialize();
-    void MoveLines();
-    void MoveExplosions();
+    void MoveFigures();
     void GetFrequency();
     void GetVelocity();
     void GetLength();

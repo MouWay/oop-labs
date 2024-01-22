@@ -7,20 +7,23 @@
 #include <experimental/random>
 #include <iostream>
 
-Explosion::Explosion(Vector2 p) {
+Explosion::Explosion(unsigned long time, Vector2 p, short maxR)
+    : Figure(1, time) {
     pos.X = p.X;
     pos.Y = p.Y;
+    maxRadius = maxR;
 }
 
 void Explosion::PutPixels(int x, int y, int curX, int curY) {
-    PutPixel(curX + x, curY + y);
-    PutPixel(curX + x, -curY + y);
-    PutPixel(-curX + x, -curY + y);
-    PutPixel(-curX + x, curY + y);
-    PutPixel(curY + x, curX + y);
-    PutPixel(curY + x, -curX + y);
-    PutPixel(-curY + x, -curX + y);
-    PutPixel(-curY + x, curX + y);
+    int k = 2;
+    PutPixel(curX * k + x, curY + y);
+    PutPixel(curX * k + x, -curY + y);
+    PutPixel(-curX * k + x, -curY + y);
+    PutPixel(-curX * k + x, curY + y);
+    PutPixel(curY * k + x, curX + y);
+    PutPixel(curY * k + x, -curX + y);
+    PutPixel(-curY * k + x, -curX + y);
+    PutPixel(-curY * k + x, curX + y);
 }
 
 void Explosion::Draw() {
@@ -41,11 +44,10 @@ void Explosion::Draw() {
 }
 
 void Explosion::PutPixel(int x, int y){
-    int k = 2;
     auto s = std::make_unique<Symbol>(Vector2(0, 0));
     int color = std::experimental::randint(0, 15);
     s.get()->SetColor(color);
-    s.get()->SetPosition(2 * x, y);
+    s.get()->SetPosition(x, y);
     symbols.push_back(std::move(s));
 }
 
@@ -60,4 +62,8 @@ int Explosion::Move() {
     }
     Draw();
     return radius;
+}
+
+bool Explosion::NeedToDelete() {
+    return radius >= maxRadius;
 }

@@ -1,7 +1,8 @@
 #include "Line.h"
 #include "Extension.h"
 
-Line::Line(unsigned short len, unsigned short x) {
+Line::Line(unsigned short speed, unsigned long time, unsigned short len, unsigned short x)
+    : Figure(speed, time) {
     length = len;
     pos = x;
     for (int i = 0; i < len; ++i) {
@@ -16,6 +17,10 @@ void Line::Generate() {
         symbols[i]->SetPosition(pos + offset, i - symbols.size());
     }
     lastSymbolIndex = 0;
+}
+
+bool Line::NeedToDelete() {
+    return GetLastSymbolPosition().Y > Extension::GetConsoleSize().Y;
 }
 
 int Line::Move() {

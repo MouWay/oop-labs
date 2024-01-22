@@ -27,7 +27,6 @@ void Manager::Initialize() {
     curSecond = clock();
     nextMoveTime = curSecond + 1000 / lineVelocity;
     nextExplosionTime = curSecond + 1000;
-    nextExplosionMoveTime = curSecond + 500;
     Extension::Clear();
     Extension::SetCursorVisibility(false);
 
@@ -57,59 +56,50 @@ void Manager::Simulate() {
         //spawn lines
         if (curTime >= nextSpawnTime && curLine < spawnFrequency) {
             int spawnPoint = std::experimental::randint(0, consoleSize.X);
-            auto line = make_unique<Line>(lineLength, spawnPoint);
+            auto line = make_shared<Line>(lineVelocity, curTime, lineLength, spawnPoint);
             if (isEpilepsyOn) {
                 int color = std::experimental::randint(0, 15);
-                line.get()->SetColor(color);
+                line->SetColor(color);
             }
             line->Generate();
-            lines.push_back(std::move(line));
+            figures.push_back(line);
+            lines.push_back(line);
             curLine++;
             nextSpawnTime = curSecond + delay[curLine];
         }
 
-        //move lines
-        if (curTime >= nextMoveTime){
-            MoveLines();
-        }
-
         //explode
         if (curTime >= nextExplosionTime){
-            for (const auto & line : lines) {
+            for (int i = 0; i < lines.size(); i++) {
+                if (lines[i]->NeedToDelete()) {
+                    lines.erase(lines.begin() + i);
+                    continue;
+                }
                 int chance = experimental::randint(1, 1000);
                 if (chance <= explosionProbability){
-                    Vector2 pos = line->Explode();
-                    auto explosion = std::make_unique<Explosion>(pos);
-                    explosion.get()->Generate();
-                    explosions.push_back(std::move(explosion));
+                    Vector2 pos = lines[i]->Explode();
+                    auto r = std::experimental::randint(minRadius, maxRadius);
+                    auto explosion = make_shared<Explosion>(curTime, pos, r);
+                    explosion->Generate();
+                    figures.push_back(explosion);
                 }
             }
             nextExplosionTime += 1000;
         }
 
-        //move explosions
-        if (curTime >= nextExplosionMoveTime) {
-            MoveExplosions();
+        //move figures
+        if (curTime >= nextMoveTime) {
+            MoveFigures();
         }
     }
 }
 
-void Manager::MoveLines() {
-    for (int i = lines.size() - 1; i >= 0; i--) {
-        if (lines[i]->GetLastSymbolPosition().Y > consoleSize.Y) {
-            lines.erase(lines.begin() + i);
-        }
-        else lines[i]->Move();
+void Manager::MoveFigures() {
+    for (int i = figures.size() - 1; i >= 0; i--){
+        if (figures[i]->NeedToDelete()) figures.erase(figures.begin() + i);
+        else figures[i]->TryMove();
     }
-    nextMoveTime += 1000 / lineVelocity;
-}
-
-void Manager::MoveExplosions() {
-    for (int i = explosions.size() - 1; i >= 0; i--){
-        auto r = explosions[i]->Move();
-        if (r >= std::experimental::randint(minRadius, maxRadius)) explosions.erase(explosions.begin() + i);
-    }
-    nextExplosionMoveTime += 500;
+    nextMoveTime += 1000 / frameRate;
 }
 
 void Manager::GetFrequency() {
